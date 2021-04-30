@@ -4,13 +4,11 @@ import (
 	"crypto/hmac"
 	"crypto/sha512"
 	"encoding/hex"
-	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
-	"net/url"
-	"path"
 
+	"github.com/google/go-querystring/query"
 	"github.com/tw7613781/abitrage_bot/util"
 )
 
@@ -36,13 +34,13 @@ func (c *client) GetBalance(currency string) {
 	method := "/account/getbalance"
 
 	params := &struct {
-		Apikey   string `json:"apikey"`
-		Currency string `json:"currency"`
-		Nonce    string `json:"nonce"`
+		Apikey   string `url:"apikey"`
+		Currency string `url:"currency"`
+		Nonce    string `url:"nonce"`
 	}{
-		Apikey:   c.apiKey,
-		Currency: currency,
-		Nonce:    util.GetTimestampMili(),
+		c.apiKey,
+		currency,
+		util.GetTimestampMili(),
 	}
 
 	resp, err := c.get(method, params)
@@ -57,23 +55,14 @@ func (c *client) GetBalance(currency string) {
 * params => "{market: 'dash-btc', quantity: '1', rate: '1'}" params except apikey and nonce
  */
 func (c *client) get(method string, params interface{}) (resp *http.Response, err error) {
-	paramsMarshal, err := json.Marshal(params)
-
+	v, err := query.Values(params)
 	if err != nil {
-		log.Fatalf("Fial to parse params: %s", err)
+		log.Fatalf("Fail to parse params: %s", err)
 	}
 
-	u, err := url.Parse(c.baseURL)
-	if err != nil {
-		log.Fatalf("Fail to parse base url: %s", err)
-	}
+	c.queryString = method + "?" + v.Encode()
 
-	urlRemain := method + "?" + string(paramsMarshal)
-	u.Path = path.Join(u.Path, urlRemain)
-
-	c.queryString = u.String()
-
-	req, err := http.NewRequest("GET", u.String(), nil)
+	req, err := http.NewRequest("GET", c.baseURL+c.queryString, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -83,9 +72,10 @@ func (c *client) get(method string, params interface{}) (resp *http.Response, er
 
 func (c *client) do(req *http.Request) (*http.Response, error) {
 	h := hmac.New(sha512.New, []byte(c.apiSecret))
-	h.Write([]byte(c.queryString))
+	h.Write([]byte("https://api.dovewallet.com/v1.1" + c.queryString))
 	sha := hex.EncodeToString(h.Sum(nil))
 
 	req.Header.Add("apisign", sha)
+	fmt.Println(req)
 	return c.c.Do(req)
 }
