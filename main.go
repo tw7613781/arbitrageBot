@@ -24,5 +24,6 @@ func main() {
 	config := util.GetConfig()
 
 	c := httpClient.InitClient(API_KEY, API_SECRET, config.BaseURL)
-	c.GetBalance("BTC")
+	// c.GetBalance("BTC")
+	c.AddWallet("TANGWEI", 0)
 }

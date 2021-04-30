@@ -4,7 +4,7 @@ import (
 	"crypto/hmac"
 	"crypto/sha512"
 	"encoding/hex"
-	"fmt"
+	"io/ioutil"
 	"log"
 	"net/http"
 
@@ -47,7 +47,49 @@ func (c *client) GetBalance(currency string) {
 	if err != nil {
 		log.Fatalf("Get balance error: %s", err)
 	}
-	fmt.Println(resp)
+
+	defer resp.Body.Close()
+
+	if resp.StatusCode == http.StatusOK {
+		bodyBytes, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			log.Fatalf("Read req body error: %s", err)
+		}
+		bodyString := string(bodyBytes)
+		log.Println(bodyString)
+	}
+}
+
+func (c *client) AddWallet(name string, t uint8) {
+	method := "/account/addwallet"
+
+	params := &struct {
+		Apikey string `url:"apikey"`
+		Name   string `url:"name"`
+		Nonce  string `url:"nonce"`
+		Type   uint8  `url:"type"`
+	}{
+		c.apiKey,
+		name,
+		util.GetTimestampMili(),
+		t,
+	}
+
+	resp, err := c.get(method, params)
+	if err != nil {
+		log.Fatalf("Add wallet error: %s", err)
+	}
+
+	defer resp.Body.Close()
+
+	if resp.StatusCode == http.StatusOK {
+		bodyBytes, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			log.Fatalf("Read req body error: %s", err)
+		}
+		bodyString := string(bodyBytes)
+		log.Println(bodyString)
+	}
 }
 
 /*
@@ -76,6 +118,6 @@ func (c *client) do(req *http.Request) (*http.Response, error) {
 	sha := hex.EncodeToString(h.Sum(nil))
 
 	req.Header.Add("apisign", sha)
-	fmt.Println(req)
+	log.Println(req.URL)
 	return c.c.Do(req)
 }
