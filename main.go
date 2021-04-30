@@ -23,16 +23,6 @@ func main() {
 
 	config := util.GetConfig()
 
-	var c httpClient.Client
-	c.ApiKey = API_KEY
-	c.ApiSecret = API_SECRET
-	c.Base_url = config.BaseURL
-
-	method := "/account/getbalance"
-	param := map[string]interface{}{
-		"currency": "btc",
-	}
-
-	c.Get(method, param)
-
+	c := httpClient.InitClient(API_KEY, API_SECRET, config.BaseURL)
+	c.GetBalance("BTC")
 }

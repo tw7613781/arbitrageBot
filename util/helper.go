@@ -2,15 +2,17 @@ package util
 
 import (
 	"log"
+	"strconv"
+	"time"
 
 	"github.com/spf13/viper"
 )
 
-type Config struct {
+type config struct {
 	BaseURL string `json:"BaseURL"`
 }
 
-func GetConfig() *Config {
+func GetConfig() *config {
 	viper.SetConfigName("config")
 	viper.SetConfigType("json")
 	viper.AddConfigPath(".")
@@ -20,27 +22,15 @@ func GetConfig() *Config {
 		log.Fatalf("Error while reading config file %s", err)
 	}
 
-	config := &Config{}
-	err = viper.Unmarshal(config)
+	c := &config{}
+	err = viper.Unmarshal(c)
 	if err != nil {
 		log.Fatalf("Fail to unmarshal json to struct %s", err)
 	}
 
-	return config
+	return c
 }
 
-func SortMapByKeyToString(params map[string]interface{}) string {
-	keys := make([]string, len(params))
-	i := 0
-	for k := range params {
-		keys[i] = k
-		i++
-	}
-
-	output := ""
-	for _, k := range keys {
-		output += "\"" + k + "\":" + "\"" + params[k].(string) + "\""
-	}
-
-	return output
+func GetTimestampMili() string {
+	return strconv.FormatInt(time.Now().UnixNano()/int64(time.Millisecond), 10)
 }

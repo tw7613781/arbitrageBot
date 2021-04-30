@@ -16,3 +16,5 @@ abitrage_bot
 # vendor/
 
 .env
+
+.vscode
