@@ -9,7 +9,7 @@ import (
 	"net/http"
 
 	"github.com/google/go-querystring/query"
-	"github.com/tw7613781/abitrage_bot/util"
+	"github.com/tw7613781/arbitrageBot/util"
 )
 
 type client struct {
@@ -28,6 +28,55 @@ func InitClient(apiKey string, apiSecret string, baseURL string) *client {
 		baseURL:   baseURL,
 	}
 	return &c
+}
+
+func (c *client) GetMarkets() {
+	method := "/public/getmarkets"
+
+	resp, err := c.getPublic(method, nil)
+	if err != nil {
+		log.Fatalf("Get balance error: %s", err)
+	}
+
+	defer resp.Body.Close()
+
+	if resp.StatusCode == http.StatusOK {
+		bodyBytes, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			log.Fatalf("Read req body error: %s", err)
+		}
+		bodyString := string(bodyBytes)
+		log.Println(bodyString)
+	}
+}
+
+/*
+* pair should be trading symbol pair. like "eth-krw"
+ */
+func (c *client) GetTicker(pair string) {
+	method := "/public/getticker"
+
+	params := &struct {
+		Market string `url:"market"`
+	}{
+		pair,
+	}
+
+	resp, err := c.getPublic(method, params)
+	if err != nil {
+		log.Fatalf("Get balance error: %s", err)
+	}
+
+	defer resp.Body.Close()
+
+	if resp.StatusCode == http.StatusOK {
+		bodyBytes, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			log.Fatalf("Read req body error: %s", err)
+		}
+		bodyString := string(bodyBytes)
+		log.Println(bodyString)
+	}
 }
 
 /*
@@ -100,10 +149,37 @@ func (c *client) AddWallet(name string, t uint8) {
 }
 
 /*
+* getPublic function queries the endpoints that no need authentication
+* method -> "/public/getticker"
+* params => {market: 'btc-eth'}
+ */
+func (c *client) getPublic(method string, params interface{}) (resp *http.Response, err error) {
+	if params != nil {
+		v, err := query.Values(params)
+		if err != nil {
+			log.Fatalf("Fail to parse params: %s", err)
+		}
+
+		c.queryString = method + "?" + v.Encode()
+	} else {
+		c.queryString = method
+	}
+
+	req, err := http.NewRequest("GET", c.baseURL+c.queryString, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	log.Println(req.URL)
+	return c.c.Do(req)
+}
+
+/*
+* get funcstion queyies the endpoints that need authentication
 * method -> "/markert/buylimit"
 * params => "{market: 'dash-btc', quantity: '1', rate: '1'}" params except apikey and nonce and the params should strictly listed by alpha orders
  */
-func (c *client) get(method string, params interface{}) (resp *http.Response, err error) {
+func (c *client) get(method string, params interface{}) (*http.Response, error) {
 	v, err := query.Values(params)
 	if err != nil {
 		log.Fatalf("Fail to parse params: %s", err)

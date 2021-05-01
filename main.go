@@ -5,8 +5,8 @@ import (
 	"os"
 
 	"github.com/joho/godotenv"
-	"github.com/tw7613781/abitrage_bot/httpClient"
-	"github.com/tw7613781/abitrage_bot/util"
+	"github.com/tw7613781/arbitrageBot/httpClient"
+	"github.com/tw7613781/arbitrageBot/util"
 )
 
 func main() {
@@ -24,5 +24,6 @@ func main() {
 	config := util.GetConfig()
 
 	c := httpClient.InitClient(API_KEY, API_SECRET, config.BaseURL)
-	c.GetBalance("BTC")
+	c.GetMarkets()
+	c.GetTicker("eth-krw")
 }
