@@ -24,6 +24,6 @@ func main() {
 	config := util.GetConfig()
 
 	c := httpClient.InitClient(API_KEY, API_SECRET, config.BaseURL)
-	c.GetMarkets()
-	c.GetTicker("eth-krw")
+	c.GetTicker("krw-eth")
+	c.GetOrderBook("krw-eth", "both")
 }

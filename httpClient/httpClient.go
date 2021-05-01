@@ -30,6 +30,38 @@ func InitClient(apiKey string, apiSecret string, baseURL string) *client {
 	return &c
 }
 
+/*
+* pair should be trading symbol pair. like "eth-krw"
+* t should be the order book type: "buy", "sell", "both"
+ */
+func (c *client) GetOrderBook(pair string, t string) {
+	method := "/public/getorderbook"
+
+	params := &struct {
+		Market string `url:"market"`
+		Type   string `url:"type"`
+	}{
+		pair,
+		t,
+	}
+
+	resp, err := c.getPublic(method, params)
+	if err != nil {
+		log.Fatalf("Get balance error: %s", err)
+	}
+
+	defer resp.Body.Close()
+
+	if resp.StatusCode == http.StatusOK {
+		bodyBytes, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			log.Fatalf("Read req body error: %s", err)
+		}
+		bodyString := string(bodyBytes)
+		log.Println(bodyString)
+	}
+}
+
 func (c *client) GetMarkets() {
 	method := "/public/getmarkets"
 
