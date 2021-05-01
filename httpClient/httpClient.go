@@ -30,6 +30,9 @@ func InitClient(apiKey string, apiSecret string, baseURL string) *client {
 	return &c
 }
 
+/*
+* currency should be cryptocurrency symbol string. like "BTC", "ETH"
+ */
 func (c *client) GetBalance(currency string) {
 	method := "/account/getbalance"
 
@@ -60,6 +63,10 @@ func (c *client) GetBalance(currency string) {
 	}
 }
 
+/*
+* name can be any string,
+* t should be 0 - general wallet, 1 - trade wallet
+ */
 func (c *client) AddWallet(name string, t uint8) {
 	method := "/account/addwallet"
 
