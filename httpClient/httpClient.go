@@ -114,7 +114,7 @@ func (c *client) get(method string, params interface{}) (resp *http.Response, er
 
 func (c *client) do(req *http.Request) (*http.Response, error) {
 	h := hmac.New(sha512.New, []byte(c.apiSecret))
-	h.Write([]byte("https://api.dovewallet.com/v1.1" + c.queryString))
+	h.Write([]byte(c.baseURL + c.queryString))
 	sha := hex.EncodeToString(h.Sum(nil))
 
 	req.Header.Add("apisign", sha)
