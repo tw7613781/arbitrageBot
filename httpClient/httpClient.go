@@ -4,7 +4,6 @@ import (
 	"crypto/hmac"
 	"crypto/sha512"
 	"encoding/hex"
-	"io/ioutil"
 	"log"
 	"net/http"
 
@@ -32,9 +31,31 @@ func InitClient(apiKey string, apiSecret string, baseURL string) *client {
 
 /*
 * pair should be trading symbol pair. like "eth-krw"
-* t should be the order book type: "buy", "sell", "both"
  */
-func (c *client) GetOrderBook(pair string, t string) {
+func (c *client) GetOrderBookBoth(pair string) (OrderResult, error) {
+	method := "/public/getorderbook"
+
+	params := &struct {
+		Market string `url:"market"`
+		Type   string `url:"type"`
+	}{
+		pair,
+		"both",
+	}
+
+	resp, err := c.getPublic(method, params)
+	if err != nil {
+		log.Fatalf("Get balance error: %s", err)
+	}
+
+	return HttpRespToOrderBookBoth(resp)
+}
+
+/*
+* pair should be trading symbol pair. like "eth-krw"
+* t should be the order book type: "buy", "sell"
+ */
+func (c *client) GetOrderBookBuyOrSell(pair string, t string) ([]Order, error) {
 	method := "/public/getorderbook"
 
 	params := &struct {
@@ -49,20 +70,10 @@ func (c *client) GetOrderBook(pair string, t string) {
 	if err != nil {
 		log.Fatalf("Get balance error: %s", err)
 	}
-
-	defer resp.Body.Close()
-
-	if resp.StatusCode == http.StatusOK {
-		bodyBytes, err := ioutil.ReadAll(resp.Body)
-		if err != nil {
-			log.Fatalf("Read req body error: %s", err)
-		}
-		bodyString := string(bodyBytes)
-		log.Println(bodyString)
-	}
+	return HttpRespToOrderBuyOrSell(resp)
 }
 
-func (c *client) GetMarkets() {
+func (c *client) GetMarkets() ([]MarketResult, error) {
 	method := "/public/getmarkets"
 
 	resp, err := c.getPublic(method, nil)
@@ -70,22 +81,13 @@ func (c *client) GetMarkets() {
 		log.Fatalf("Get balance error: %s", err)
 	}
 
-	defer resp.Body.Close()
-
-	if resp.StatusCode == http.StatusOK {
-		bodyBytes, err := ioutil.ReadAll(resp.Body)
-		if err != nil {
-			log.Fatalf("Read req body error: %s", err)
-		}
-		bodyString := string(bodyBytes)
-		log.Println(bodyString)
-	}
+	return HttpRespToMarket(resp)
 }
 
 /*
 * pair should be trading symbol pair. like "eth-krw"
  */
-func (c *client) GetTicker(pair string) {
+func (c *client) GetTicker(pair string) (TickerResult, error) {
 	method := "/public/getticker"
 
 	params := &struct {
@@ -99,22 +101,13 @@ func (c *client) GetTicker(pair string) {
 		log.Fatalf("Get balance error: %s", err)
 	}
 
-	defer resp.Body.Close()
-
-	if resp.StatusCode == http.StatusOK {
-		bodyBytes, err := ioutil.ReadAll(resp.Body)
-		if err != nil {
-			log.Fatalf("Read req body error: %s", err)
-		}
-		bodyString := string(bodyBytes)
-		log.Println(bodyString)
-	}
+	return HttpRespToTicker(resp)
 }
 
 /*
 * currency should be cryptocurrency symbol string. like "BTC", "ETH"
  */
-func (c *client) GetBalance(currency string) {
+func (c *client) GetBalance(currency string) (BalanceResult, error) {
 	method := "/account/getbalance"
 
 	params := &struct {
@@ -132,53 +125,35 @@ func (c *client) GetBalance(currency string) {
 		log.Fatalf("Get balance error: %s", err)
 	}
 
-	defer resp.Body.Close()
-
-	if resp.StatusCode == http.StatusOK {
-		bodyBytes, err := ioutil.ReadAll(resp.Body)
-		if err != nil {
-			log.Fatalf("Read req body error: %s", err)
-		}
-		bodyString := string(bodyBytes)
-		log.Println(bodyString)
-	}
+	return HttpRespToBalance(resp)
 }
 
-/*
-* name can be any string,
-* t should be 0 - general wallet, 1 - trade wallet
- */
-func (c *client) AddWallet(name string, t uint8) {
-	method := "/account/addwallet"
+// /*
+// * name can be any string,
+// * t should be 0 - general wallet, 1 - trade wallet
+//  */
+// func (c *client) AddWallet(name string, t uint8) (string, error) {
+// 	method := "/account/addwallet"
 
-	params := &struct {
-		Apikey string `url:"apikey"`
-		Name   string `url:"name"`
-		Nonce  string `url:"nonce"`
-		Type   uint8  `url:"type"`
-	}{
-		c.apiKey,
-		name,
-		util.GetTimestampMili(),
-		t,
-	}
+// 	params := &struct {
+// 		Apikey string `url:"apikey"`
+// 		Name   string `url:"name"`
+// 		Nonce  string `url:"nonce"`
+// 		Type   uint8  `url:"type"`
+// 	}{
+// 		c.apiKey,
+// 		name,
+// 		util.GetTimestampMili(),
+// 		t,
+// 	}
 
-	resp, err := c.get(method, params)
-	if err != nil {
-		log.Fatalf("Add wallet error: %s", err)
-	}
+// 	resp, err := c.get(method, params)
+// 	if err != nil {
+// 		log.Fatalf("Add wallet error: %s", err)
+// 	}
 
-	defer resp.Body.Close()
-
-	if resp.StatusCode == http.StatusOK {
-		bodyBytes, err := ioutil.ReadAll(resp.Body)
-		if err != nil {
-			log.Fatalf("Read req body error: %s", err)
-		}
-		bodyString := string(bodyBytes)
-		log.Println(bodyString)
-	}
-}
+// 	return util.HttpRespToStruct(resp)
+// }
 
 /*
 * getPublic function queries the endpoints that no need authentication

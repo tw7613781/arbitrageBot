@@ -24,6 +24,16 @@ func main() {
 	config := util.GetConfig()
 
 	c := httpClient.InitClient(API_KEY, API_SECRET, config.BaseURL)
-	c.GetTicker("krw-eth")
-	c.GetOrderBook("krw-eth", "both")
+	// result, _ := c.GetTicker("krw-eth")
+	// log.Printf("%+v", result)
+	// result, _ := c.GetOrderBookBuyOrSell("krw-eth", "buy")
+	// log.Println(result)
+	// result, _ := c.GetMarkets()
+	// log.Println(result[len(result)-1])
+	// result, _ := c.GetTicker("eth-krw")
+	// log.Println(result.Ask)
+	// log.Println(result.Bid)
+	// log.Println(result.Last)
+	result, _ := c.GetBalance("btc")
+	log.Println(result)
 }
