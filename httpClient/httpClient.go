@@ -101,7 +101,7 @@ func (c *client) AddWallet(name string, t uint8) {
 
 /*
 * method -> "/markert/buylimit"
-* params => "{market: 'dash-btc', quantity: '1', rate: '1'}" params except apikey and nonce
+* params => "{market: 'dash-btc', quantity: '1', rate: '1'}" params except apikey and nonce and the params should strictly listed by alpha orders
  */
 func (c *client) get(method string, params interface{}) (resp *http.Response, err error) {
 	v, err := query.Values(params)
