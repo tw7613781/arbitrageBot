@@ -1,39 +1,9 @@
 package main
 
 import (
-	"log"
-	"os"
-
-	"github.com/joho/godotenv"
-	"github.com/tw7613781/arbitrageBot/httpClient"
-	"github.com/tw7613781/arbitrageBot/util"
+	"fmt"
 )
 
 func main() {
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatal("Error loading .env file")
-	}
-
-	API_KEY := os.Getenv("API_KEY")
-	API_SECRET := os.Getenv("API_SECRET")
-	if API_KEY == "" || API_SECRET == "" {
-		log.Fatal("API_KEY or API_SECRET is not provided")
-	}
-
-	config := util.GetConfig()
-
-	c := httpClient.InitClient(API_KEY, API_SECRET, config.BaseURL)
-	// result, _ := c.GetTicker("krw-eth")
-	// log.Printf("%+v", result)
-	// result, _ := c.GetOrderBookBuyOrSell("krw-eth", "buy")
-	// log.Println(result)
-	// result, _ := c.GetMarkets()
-	// log.Println(result[len(result)-1])
-	// result, _ := c.GetTicker("eth-krw")
-	// log.Println(result.Ask)
-	// log.Println(result.Bid)
-	// log.Println(result.Last)
-	result, _ := c.GetBalance("btc")
-	log.Println(result)
+	fmt.Println("Hello dove wallet")
 }

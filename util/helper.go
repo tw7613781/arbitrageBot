@@ -8,21 +8,21 @@ import (
 	"github.com/spf13/viper"
 )
 
-type config struct {
+type Config struct {
 	BaseURL string `json:"BaseURL"`
 }
 
-func GetConfig() *config {
+func GetConfig(path string) *Config {
 	viper.SetConfigName("config")
 	viper.SetConfigType("json")
-	viper.AddConfigPath(".")
+	viper.AddConfigPath(path)
 
 	err := viper.ReadInConfig()
 	if err != nil {
 		log.Fatalf("Error while reading config file %s", err)
 	}
 
-	c := &config{}
+	c := &Config{}
 	err = viper.Unmarshal(c)
 	if err != nil {
 		log.Fatalf("Fail to unmarshal json to struct %s", err)

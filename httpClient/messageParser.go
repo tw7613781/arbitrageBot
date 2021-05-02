@@ -75,13 +75,12 @@ type Balance struct {
 	Result  BalanceResult `json:"result"`
 }
 
-func HttpRespToOrderBookBoth(resp *http.Response) (OrderResult, error) {
+func HttpRespToStruct(resp *http.Response, output interface{}) error {
 	defer resp.Body.Close()
 
-	var d OrderBookBoth
 	if resp.StatusCode != http.StatusOK {
 		log.Printf("Error with status code : %d", resp.StatusCode)
-		return d.Result, errors.New(string(resp.Status))
+		return errors.New(string(resp.Status))
 	}
 
 	bodyBytes, err := ioutil.ReadAll(resp.Body)
@@ -89,113 +88,10 @@ func HttpRespToOrderBookBoth(resp *http.Response) (OrderResult, error) {
 		log.Fatalf("Read req body error: %s", err)
 	}
 
-	err = json.Unmarshal(bodyBytes, &d)
+	err = json.Unmarshal(bodyBytes, output)
 	if err != nil {
 		log.Fatalf("Unmarshal data error: %s", err)
 	}
-	if !d.Success {
-		log.Printf("Error with data message: %s", d.Message)
-		return d.Result, errors.New(d.Message)
-	}
-	return d.Result, nil
-}
 
-func HttpRespToOrderBuyOrSell(resp *http.Response) ([]Order, error) {
-	defer resp.Body.Close()
-
-	var d OrderBookBuyOrSell
-	if resp.StatusCode != http.StatusOK {
-		log.Printf("Error with status code : %d", resp.StatusCode)
-		return d.Result, errors.New(string(resp.Status))
-	}
-
-	bodyBytes, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		log.Fatalf("Read req body error: %s", err)
-	}
-
-	err = json.Unmarshal(bodyBytes, &d)
-	if err != nil {
-		log.Fatalf("Unmarshal data error: %s", err)
-	}
-	if !d.Success {
-		log.Printf("Error with data message: %s", d.Message)
-		return d.Result, errors.New(d.Message)
-	}
-	return d.Result, nil
-}
-
-func HttpRespToMarket(resp *http.Response) ([]MarketResult, error) {
-	defer resp.Body.Close()
-
-	var d Market
-	if resp.StatusCode != http.StatusOK {
-		log.Printf("Error with status code : %d", resp.StatusCode)
-		return d.Result, errors.New(string(resp.Status))
-	}
-
-	bodyBytes, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		log.Fatalf("Read req body error: %s", err)
-	}
-
-	err = json.Unmarshal(bodyBytes, &d)
-	if err != nil {
-		log.Fatalf("Unmarshal data error: %s", err)
-	}
-	if !d.Success {
-		log.Printf("Error with data message: %s", d.Message)
-		return d.Result, errors.New(d.Message)
-	}
-	return d.Result, nil
-}
-
-func HttpRespToTicker(resp *http.Response) (TickerResult, error) {
-	defer resp.Body.Close()
-
-	var d Ticker
-	if resp.StatusCode != http.StatusOK {
-		log.Printf("Error with status code : %d", resp.StatusCode)
-		return d.Result, errors.New(string(resp.Status))
-	}
-
-	bodyBytes, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		log.Fatalf("Read req body error: %s", err)
-	}
-
-	err = json.Unmarshal(bodyBytes, &d)
-	if err != nil {
-		log.Fatalf("Unmarshal data error: %s", err)
-	}
-	if !d.Success {
-		log.Printf("Error with data message: %s", d.Message)
-		return d.Result, errors.New(d.Message)
-	}
-	return d.Result, nil
-}
-
-func HttpRespToBalance(resp *http.Response) (BalanceResult, error) {
-	defer resp.Body.Close()
-
-	var d Balance
-	if resp.StatusCode != http.StatusOK {
-		log.Printf("Error with status code : %d", resp.StatusCode)
-		return d.Result, errors.New(string(resp.Status))
-	}
-
-	bodyBytes, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		log.Fatalf("Read req body error: %s", err)
-	}
-
-	err = json.Unmarshal(bodyBytes, &d)
-	if err != nil {
-		log.Fatalf("Unmarshal data error: %s", err)
-	}
-	if !d.Success {
-		log.Printf("Error with data message: %s", d.Message)
-		return d.Result, errors.New(d.Message)
-	}
-	return d.Result, nil
+	return nil
 }

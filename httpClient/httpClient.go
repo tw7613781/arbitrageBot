@@ -4,6 +4,7 @@ import (
 	"crypto/hmac"
 	"crypto/sha512"
 	"encoding/hex"
+	"errors"
 	"log"
 	"net/http"
 
@@ -48,7 +49,13 @@ func (c *client) GetOrderBookBoth(pair string) (OrderResult, error) {
 		log.Fatalf("Get balance error: %s", err)
 	}
 
-	return HttpRespToOrderBookBoth(resp)
+	var output OrderBookBoth
+	HttpRespToStruct(resp, &output)
+	if !output.Success {
+		log.Printf("Error with data message: %s", output.Message)
+		return output.Result, errors.New(output.Message)
+	}
+	return output.Result, nil
 }
 
 /*
@@ -70,7 +77,14 @@ func (c *client) GetOrderBookBuyOrSell(pair string, t string) ([]Order, error) {
 	if err != nil {
 		log.Fatalf("Get balance error: %s", err)
 	}
-	return HttpRespToOrderBuyOrSell(resp)
+
+	var output OrderBookBuyOrSell
+	HttpRespToStruct(resp, &output)
+	if !output.Success {
+		log.Printf("Error with data message: %s", output.Message)
+		return output.Result, errors.New(output.Message)
+	}
+	return output.Result, nil
 }
 
 func (c *client) GetMarkets() ([]MarketResult, error) {
@@ -81,11 +95,17 @@ func (c *client) GetMarkets() ([]MarketResult, error) {
 		log.Fatalf("Get balance error: %s", err)
 	}
 
-	return HttpRespToMarket(resp)
+	var output Market
+	HttpRespToStruct(resp, &output)
+	if !output.Success {
+		log.Printf("Error with data message: %s", output.Message)
+		return output.Result, errors.New(output.Message)
+	}
+	return output.Result, nil
 }
 
 /*
-* pair should be trading symbol pair. like "eth-krw"
+* pair should be trading symbol pair. like "krw-eth"
  */
 func (c *client) GetTicker(pair string) (TickerResult, error) {
 	method := "/public/getticker"
@@ -101,7 +121,13 @@ func (c *client) GetTicker(pair string) (TickerResult, error) {
 		log.Fatalf("Get balance error: %s", err)
 	}
 
-	return HttpRespToTicker(resp)
+	var output Ticker
+	HttpRespToStruct(resp, &output)
+	if !output.Success {
+		log.Printf("Error with data message: %s", output.Message)
+		return output.Result, errors.New(output.Message)
+	}
+	return output.Result, nil
 }
 
 /*
@@ -125,7 +151,13 @@ func (c *client) GetBalance(currency string) (BalanceResult, error) {
 		log.Fatalf("Get balance error: %s", err)
 	}
 
-	return HttpRespToBalance(resp)
+	var output Balance
+	HttpRespToStruct(resp, &output)
+	if !output.Success {
+		log.Printf("Error with data message: %s", output.Message)
+		return output.Result, errors.New(output.Message)
+	}
+	return output.Result, nil
 }
 
 // /*
