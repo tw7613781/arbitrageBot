@@ -12,7 +12,7 @@ import (
 	"github.com/tw7613781/arbitrageBot/util"
 )
 
-type client struct {
+type Client struct {
 	c           http.Client
 	baseURL     string
 	apiKey      string
@@ -20,8 +20,8 @@ type client struct {
 	queryString string
 }
 
-func InitClient(apiKey string, apiSecret string, baseURL string) *client {
-	c := client{
+func InitClient(apiKey string, apiSecret string, baseURL string) *Client {
+	c := Client{
 		c:         http.Client{},
 		apiKey:    apiKey,
 		apiSecret: apiSecret,
@@ -33,7 +33,7 @@ func InitClient(apiKey string, apiSecret string, baseURL string) *client {
 /*
 * pair should be trading symbol pair. like "eth-krw"
  */
-func (c *client) GetOrderBookBoth(pair string) (OrderResult, error) {
+func (c *Client) GetOrderBookBoth(pair string) (OrderResult, error) {
 	method := "/public/getorderbook"
 
 	params := &struct {
@@ -62,7 +62,7 @@ func (c *client) GetOrderBookBoth(pair string) (OrderResult, error) {
 * pair should be trading symbol pair. like "eth-krw"
 * t should be the order book type: "buy", "sell"
  */
-func (c *client) GetOrderBookBuyOrSell(pair string, t string) ([]Order, error) {
+func (c *Client) GetOrderBookBuyOrSell(pair string, t string) ([]Order, error) {
 	method := "/public/getorderbook"
 
 	params := &struct {
@@ -87,7 +87,7 @@ func (c *client) GetOrderBookBuyOrSell(pair string, t string) ([]Order, error) {
 	return output.Result, nil
 }
 
-func (c *client) GetMarkets() ([]MarketResult, error) {
+func (c *Client) GetMarkets() ([]MarketResult, error) {
 	method := "/public/getmarkets"
 
 	resp, err := c.getPublic(method, nil)
@@ -107,7 +107,7 @@ func (c *client) GetMarkets() ([]MarketResult, error) {
 /*
 * pair should be trading symbol pair. like "krw-eth"
  */
-func (c *client) GetTicker(pair string) (TickerResult, error) {
+func (c *Client) GetTicker(pair string) (TickerResult, error) {
 	method := "/public/getticker"
 
 	params := &struct {
@@ -133,7 +133,7 @@ func (c *client) GetTicker(pair string) (TickerResult, error) {
 /*
 * currency should be cryptocurrency symbol string. like "BTC", "ETH"
  */
-func (c *client) GetBalance(currency string) (BalanceResult, error) {
+func (c *Client) GetBalance(currency string) (BalanceResult, error) {
 	method := "/account/getbalance"
 
 	params := &struct {
@@ -164,7 +164,7 @@ func (c *client) GetBalance(currency string) (BalanceResult, error) {
 // * name can be any string,
 // * t should be 0 - general wallet, 1 - trade wallet
 //  */
-// func (c *client) AddWallet(name string, t uint8) (string, error) {
+// func (c *Client) AddWallet(name string, t uint8) (string, error) {
 // 	method := "/account/addwallet"
 
 // 	params := &struct {
@@ -192,7 +192,7 @@ func (c *client) GetBalance(currency string) (BalanceResult, error) {
 * method -> "/public/getticker"
 * params => {market: 'btc-eth'}
  */
-func (c *client) getPublic(method string, params interface{}) (resp *http.Response, err error) {
+func (c *Client) getPublic(method string, params interface{}) (resp *http.Response, err error) {
 	if params != nil {
 		v, err := query.Values(params)
 		if err != nil {
@@ -209,7 +209,7 @@ func (c *client) getPublic(method string, params interface{}) (resp *http.Respon
 		return nil, err
 	}
 
-	log.Println(req.URL)
+	// log.Println(req.URL)
 	return c.c.Do(req)
 }
 
@@ -218,7 +218,7 @@ func (c *client) getPublic(method string, params interface{}) (resp *http.Respon
 * method -> "/markert/buylimit"
 * params => "{market: 'dash-btc', quantity: '1', rate: '1'}" params except apikey and nonce and the params should strictly listed by alpha orders
  */
-func (c *client) get(method string, params interface{}) (*http.Response, error) {
+func (c *Client) get(method string, params interface{}) (*http.Response, error) {
 	v, err := query.Values(params)
 	if err != nil {
 		log.Fatalf("Fail to parse params: %s", err)
@@ -234,12 +234,12 @@ func (c *client) get(method string, params interface{}) (*http.Response, error) 
 	return c.do(req)
 }
 
-func (c *client) do(req *http.Request) (*http.Response, error) {
+func (c *Client) do(req *http.Request) (*http.Response, error) {
 	h := hmac.New(sha512.New, []byte(c.apiSecret))
 	h.Write([]byte(c.baseURL + c.queryString))
 	sha := hex.EncodeToString(h.Sum(nil))
 
 	req.Header.Add("apisign", sha)
-	log.Println(req.URL)
+	// log.Println(req.URL)
 	return c.c.Do(req)
 }
