@@ -21,6 +21,7 @@ func FindChance(c *httpClient.Client, pairs []string) {
 		if err != nil {
 			log.Printf("error get balance of KRW: %v", err)
 		}
+		log.Println("--------------------------------------")
 		log.Printf("krw balance: %v", balance.Available)
 
 		tmp := balance.Available
@@ -52,9 +53,9 @@ func FindChance(c *httpClient.Client, pairs []string) {
 		if changeRate > 0 {
 			log.Printf("New balance: %v", tmp)
 			log.Printf("Old balance: %v", balance.Available)
-			log.Printf("found chance: %v", changeRate)
+			log.Printf("Found chance: %v", changeRate)
 		}
-
+		log.Printf("Change Rate: %v", changeRate)
 		time.Sleep(3 * time.Second)
 	}
 
