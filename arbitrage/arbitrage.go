@@ -52,7 +52,7 @@ func FindChance(c *httpClient.Client, pairs []string) {
 		if changeRate > 0 {
 			log.Printf("New balance: %v", tmp)
 			log.Printf("Old balance: %v", balance.Available)
-			log.Printf("found change: %v", changeRate)
+			log.Printf("found chance: %v", changeRate)
 		}
 
 		time.Sleep(3 * time.Second)
