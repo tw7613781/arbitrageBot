@@ -26,10 +26,10 @@ func FindChance(c *httpClient.Client, pairs []string) {
 		tmp := balance.Available
 		quanlityNotEnough := false
 
-		for i, pair := range pairs {
+		for _, pair := range pairs {
 			r, err := c.GetOrderBookBuyOrSell(pair, "buy")
 			if err != nil {
-				log.Printf("%v: error to get order book sell price of %v: %v", i, pair, err)
+				log.Printf("error to get order book sell price of %v: %v", pair, err)
 			}
 			// log.Println(r)
 			log.Printf("pair %v price - %v, quanlity - %v", pair, r[0].Rate, r[0].Quantity)
@@ -37,7 +37,7 @@ func FindChance(c *httpClient.Client, pairs []string) {
 				tmp = tmp * r[0].Rate * (1 - fee)
 				log.Printf("tmp value: %v", tmp)
 			} else {
-				log.Printf("the quantily is %v, less then requested %v", r[0].Quantity, tmp)
+				log.Printf("pair %v: the quantily is %v, less then requested %v", pair, r[0].Quantity, tmp)
 				quanlityNotEnough = true
 				break
 			}
