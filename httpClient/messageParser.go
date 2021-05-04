@@ -9,8 +9,8 @@ import (
 )
 
 type Order struct {
-	Quantity float32 `json:"Quantity"`
-	Rate     float32 `json:"Rate"`
+	Quantity float64 `json:"Quantity"`
+	Rate     float64 `json:"Rate"`
 }
 
 type OrderResult struct {
@@ -48,9 +48,9 @@ type Market struct {
 }
 
 type TickerResult struct {
-	Bid  float32 `json:"Bit"`
-	Ask  float32 `json:"Ask"`
-	Last float32 `json:"Last"`
+	Bid  float64 `json:"Bit"`
+	Ask  float64 `json:"Ask"`
+	Last float64 `json:"Last"`
 }
 
 type Ticker struct {
@@ -61,9 +61,9 @@ type Ticker struct {
 
 type BalanceResult struct {
 	Currency      string  `json:"Currency"`
-	Balance       float32 `json:"Balance"`
-	Available     float32 `json:"Available"`
-	Pending       float32 `json:"Pending"`
+	Balance       float64 `json:"Balance"`
+	Available     float64 `json:"Available"`
+	Pending       float64 `json:"Pending"`
 	CryptoAddress string  `json:"CryptoAddress"`
 	Requested     bool    `json:"Requested"`
 	Uuid          string  `json:"Uuid"`
@@ -73,6 +73,16 @@ type Balance struct {
 	Success bool          `json:"success"`
 	Message string        `json:"message"`
 	Result  BalanceResult `json:"result"`
+}
+
+type LimitOrderResult struct {
+	Uuid int `json:"uuid"`
+}
+
+type LimitOrder struct {
+	Success bool             `json:"success"`
+	Message string           `json:"message"`
+	Result  LimitOrderResult `json:"result"`
 }
 
 func HttpRespToStruct(resp *http.Response, output interface{}) error {

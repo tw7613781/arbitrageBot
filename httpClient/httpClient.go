@@ -160,6 +160,50 @@ func (c *Client) GetBalance(currency string) (BalanceResult, error) {
 	return output.Result, nil
 }
 
+/*
+* market should be cryptocurrency trading pair. like "eth-btc"
+* rate should be the limit buy price
+* quantity should be the buy quantity
+* t should be "buy" or "sell"
+ */
+func (c *Client) LimitOrder(market string, rate float64, quantity float64, t string) (LimitOrderResult, error) {
+	var method string
+	if t == "buy" {
+		method = "/market/buylimit"
+	} else if t == "sell" {
+		method = "/market/selllimit"
+	} else {
+		return LimitOrderResult{}, errors.New("type is not supported")
+	}
+
+	params := &struct {
+		Apikey   string  `url:"apikey"`
+		Market   string  `url:"market"`
+		Nonce    string  `url:"nonce"`
+		Quantity float64 `url:"quantity"`
+		Rate     float64 `url:"rate"`
+	}{
+		c.apiKey,
+		market,
+		util.GetTimestampMili(),
+		quantity,
+		rate,
+	}
+
+	resp, err := c.get(method, params)
+	if err != nil {
+		log.Fatalf("Get balance error: %s", err)
+	}
+
+	var output LimitOrder
+	HttpRespToStruct(resp, &output)
+	if !output.Success {
+		log.Printf("Error with data message: %s", output.Message)
+		return output.Result, errors.New(output.Message)
+	}
+	return output.Result, nil
+}
+
 // /*
 // * name can be any string,
 // * t should be 0 - general wallet, 1 - trade wallet
