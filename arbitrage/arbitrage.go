@@ -15,48 +15,56 @@ import (
  */
 func FindChance(c *httpClient.Client, pairs []string) {
 	// 0.1% trading feee
-	fee := 0.001
+	var fee, initialKrw float64 = 0.001, 10000
 	for {
-		balance, err := c.GetBalance("KRW")
-		if err != nil {
-			log.Printf("error get balance of KRW: %v", err)
-		}
-		log.Println("--------------------------------------")
-		log.Printf("krw balance: %v", balance.Available)
-
-		tmp := balance.Available
-		quanlityNotEnough := false
-
+		log.Printf("%v ...", pairs)
+		stopCurrentRound := false
+		tmp := initialKrw
+		var orders []httpClient.Order
 		for _, pair := range pairs {
 			r, err := c.GetOrderBookBuyOrSell(pair, "buy")
 			if err != nil {
 				log.Printf("error to get order book sell price of %v: %v", pair, err)
+				stopCurrentRound = true
+				break
 			}
-			// log.Println(r)
-			log.Printf("pair %v price - %v, quanlity - %v", pair, r[0].Rate, r[0].Quantity)
+			// log.Printf("pair %v price - %v, quanlity - %v", pair, r[0].Rate, r[0].Quantity)
 			if tmp <= r[0].Quantity {
 				tmp = tmp * r[0].Rate * (1 - fee)
-				log.Printf("tmp value: %v", tmp)
+				order := httpClient.Order{
+					Quantity: tmp,
+					Rate:     r[0].Rate,
+				}
+				orders = append(orders, order)
+				// log.Printf("tmp value: %v", tmp)
 			} else {
 				log.Printf("pair %v: the quantily is %v, less then requested %v", pair, r[0].Quantity, tmp)
-				quanlityNotEnough = true
+				stopCurrentRound = true
 				break
 			}
 		}
-		if quanlityNotEnough {
+		if stopCurrentRound {
 			continue
 		}
-		// log.Printf("New balance: %v", tmp)
-		// log.Printf("Old balance: %v", balance.Available)
-		// log.Printf("Change rate: %v", (tmp-balance.Balance)/balance.Available*100)
-		changeRate := (tmp - balance.Balance) / balance.Available
+		changeRate := (tmp - initialKrw) / initialKrw
+		log.Printf("%v: %v", pairs, changeRate)
 		if changeRate > 0 {
 			log.Printf("New balance: %v", tmp)
-			log.Printf("Old balance: %v", balance.Available)
+			log.Printf("Old balance: %v", initialKrw)
 			log.Printf("Found chance: %v", changeRate)
+			execute(c, pairs, orders)
 		}
-		log.Printf("Change Rate: %v", changeRate)
 		time.Sleep(3 * time.Second)
 	}
+}
 
+func execute(c *httpClient.Client, pairs []string, orders []httpClient.Order) {
+	for i := 0; i < 3; i++ {
+		_, err := c.LimitOrder(pairs[0], orders[0].Rate, orders[0].Quantity, "sell")
+		if err != nil {
+			log.Printf("Order for %v failed: %v", pairs[0], err)
+			break
+		}
+	}
+	log.Printf("Orders %v succeed %v", pairs, orders)
 }
